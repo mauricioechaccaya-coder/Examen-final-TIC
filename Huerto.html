@@ -1,0 +1,2217 @@
+﻿html_v4 = r'''<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HuertoDirecto · Del Valle del Chillón a tu Olla Común</title>
+<meta name="theme-color" content="#0d3b20">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg: #eef5e8;
+  --card: #ffffff;
+  --card-alt: #f5f9f0;
+  --ink: #0f2419;
+  --muted: #4f6659;
+  --line: #d2e0c8;
+  --verde: #14532d;
+  --verde-osc: #0a2e18;
+  --v2: #1f7a45;
+  --lima: #b8e35a;
+  --lima-suave: #e6f6c3;
+  --zanahoria: #f97316;
+  --rojo: #c2410c;
+  --good: #2f8a4b;
+  --mid: #d89a12;
+  --bad: #c4402f;
+  --acc: #1f7a45;
+  --r: 22px;
+  --sh: 0 14px 32px -16px rgba(10, 46, 24, 0.28);
+  --sh-lg: 0 24px 48px -18px rgba(10, 46, 24, 0.38);
+}
+
+* { box-sizing: border-box; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(184, 227, 90, 0.28) 0px, transparent 50%),
+    radial-gradient(at 100% 15%, rgba(31, 122, 69, 0.16) 0px, transparent 55%),
+    radial-gradient(at 50% 100%, rgba(249, 115, 22, 0.1) 0px, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231f7a45' fill-opacity='0.045'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  color: var(--ink);
+  font: 16px/1.55 "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  padding-bottom: 100px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hojas flotantes de trasfondo */
+.bg-leaves {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.leaf {
+  position: absolute;
+  opacity: 0.14;
+  animation: floatLeaf 18s infinite ease-in-out;
+}
+.leaf:nth-child(1) { top: 12%; left: 5%; width: 48px; animation-duration: 21s; }
+.leaf:nth-child(2) { top: 45%; right: 6%; width: 64px; animation-duration: 25s; animation-delay: -4s; }
+.leaf:nth-child(3) { bottom: 18%; left: 10%; width: 42px; animation-duration: 19s; animation-delay: -9s; }
+.leaf:nth-child(4) { top: 72%; right: 15%; width: 54px; animation-duration: 23s; animation-delay: -2s; }
+
+@keyframes floatLeaf {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  33% { transform: translateY(-22px) rotate(14deg) scale(1.05); }
+  66% { transform: translateY(14px) rotate(-10deg) scale(0.96); }
+}
+
+a { color: var(--v2); }
+
+/* Header & Logotipo SVG Personalizado */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: rgba(10, 46, 24, 0.94);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 10px 28px -10px rgba(10, 46, 24, 0.55);
+  border-bottom: 1px solid rgba(184, 227, 90, 0.25);
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.025em;
+}
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--lima), #84cc16);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(184, 227, 90, 0.35);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.logo:hover .logo-mark { transform: rotate(-10deg) scale(1.08); }
+.logo-text span { color: var(--lima); }
+.logo-sub { font-size: 0.65rem; font-weight: 600; color: #b6d8c0; display: block; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.top button {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 99px;
+  padding: 6px 15px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.top button:hover { background: var(--lima); color: var(--verde-osc); border-color: var(--lima); }
+
+/* Navegación con indicador deslizante */
+.nav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 40;
+  border-radius: 99px;
+  background: rgba(10, 46, 24, 0.96);
+  backdrop-filter: blur(10px);
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 16px 36px -8px rgba(10, 46, 24, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.nav a {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  font-size: 0.82rem;
+  text-decoration: none;
+  color: #cfe8d6;
+  font-weight: 600;
+  border-radius: 99px;
+  transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+}
+.nav a:hover:not(.on) { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.nav a.on {
+  background: var(--lima);
+  color: var(--verde-osc);
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(184, 227, 90, 0.45);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 840px) {
+  .nav {
+    position: sticky;
+    top: 68px;
+    bottom: auto;
+    margin: 14px auto 0;
+    width: max-content;
+    max-width: 96%;
+  }
+  .nav a { flex: 0 0 auto; padding: 9px 18px; font-size: 0.9rem; }
+  body { padding-bottom: 40px; }
+}
+
+/* Contenedor principal y transiciones entre pestañas */
+.wrap { max-width: 1060px; margin: 0 auto; padding: 18px 16px; position: relative; z-index: 2; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.35rem); line-height: 1.15; margin: 0.2em 0 0.45em; letter-spacing: -0.025em; }
+h2 { font-size: 1.32rem; margin: 1.6em 0 0.65em; letter-spacing: -0.015em; display: flex; align-items: center; gap: 8px; }
+h3 { font-size: 1.08rem; margin: 0 0 0.35em; }
+.muted { color: var(--muted); }
+
+/* Sub-navegación rápida de secciones dentro de cada pestaña */
+.subnav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 2px 12px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+}
+.subnav::-webkit-scrollbar { display: none; }
+.subnav button {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  color: var(--verde);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+.subnav button:hover {
+  background: var(--verde);
+  color: #fff;
+  border-color: var(--verde);
+  transform: translateY(-2px);
+}
+
+/* Tarjetas y Grillas */
+.card, .kpi, .ledger {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border-radius: var(--r);
+  padding: 18px;
+  margin: 12px 0;
+  box-shadow: var(--sh);
+  border: 1px solid rgba(210, 224, 200, 0.85);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+.card:hover, .kpi:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 640px) {
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 880px) {
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* HERO PRINCIPAL CON ANIMACIÓN INTERACTIVA DE CADENA CHACRA -> OLLA */
+.hero {
+  background: linear-gradient(135deg, rgba(10, 46, 24, 0.94) 0%, rgba(20, 83, 45, 0.88) 55%, rgba(31, 122, 69, 0.85) 100%),
+              url("https://images.unsplash.com/photo-1595855759920-86582396756a?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+  color: #fff;
+  border-radius: 30px;
+  padding: 34px 26px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--sh-lg);
+  border: 1px solid rgba(184, 227, 90, 0.3);
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, rgba(184, 227, 90, 0.22), transparent 70%);
+  top: -100px;
+  right: -80px;
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: center; position: relative; z-index: 2; }
+@media (min-width: 780px) { .hero-grid { grid-template-columns: 1.2fr 0.85fr; } }
+.hero h1 { font-size: clamp(2rem, 4.8vw, 2.85rem); margin: 10px 0 14px; color: #fff; }
+.hero p { color: #e2f2e5; font-size: 1.04rem; max-width: 48ch; margin: 0 0 20px; }
+
+/* Escena SVG Animada en la Principal: Camión llevando cosecha del Valle a la Olla */
+.hero-scene {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+.scene-svg { width: 100%; height: auto; display: block; border-radius: 14px; background: linear-gradient(180deg, #164e2e 0%, #0f3921 100%); }
+.truck-group { animation: driveRoute 7s infinite ease-in-out; }
+.wheel { transform-box: fill-box; transform-origin: center; animation: spinWheel 1.2s linear infinite; }
+.steam { animation: riseSteam 2.6s infinite ease-out; opacity: 0; }
+.steam:nth-child(2) { animation-delay: 0.8s; }
+.steam:nth-child(3) { animation-delay: 1.6s; }
+.sun-pulse { transform-box: fill-box; transform-origin: center; animation: pulseSun 4s infinite ease-in-out; }
+
+@keyframes driveRoute {
+  0%, 10% { transform: translateX(0px); }
+  45%, 55% { transform: translateX(132px); }
+  90%, 100% { transform: translateX(0px); }
+}
+@keyframes spinWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes riseSteam {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  40% { opacity: 0.85; }
+  100% { transform: translateY(-16px) scale(1.25); opacity: 0; }
+}
+@keyframes pulseSun {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+/* Badges & Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--lima);
+  color: var(--verde-osc);
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 4px 13px;
+  font-size: 0.78rem;
+}
+.chip.soft { background: var(--lima-suave); color: var(--verde); font-weight: 700; }
+.chip.org { background: #ffedd5; color: #9a3412; }
+
+/* Stats & KPIs */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+@media (min-width: 720px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+.stat {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--sh);
+  border-bottom: 4px solid var(--v2);
+}
+.stat b { display: block; font-size: 2.15rem; line-height: 1.05; color: var(--verde); letter-spacing: -0.03em; }
+.stat span { font-size: 0.86rem; color: var(--muted); display: block; margin-top: 4px; }
+.stat.o { border-bottom-color: var(--zanahoria); }
+.stat.o b { color: var(--zanahoria); }
+
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 680px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
+.kpi strong { display: block; font-size: 1.65rem; color: var(--verde); letter-spacing: -0.02em; }
+
+/* Tarjetas Multimedia (Productores y Comedores) */
+.media-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; margin: 0; }
+.media-cover { position: relative; height: 168px; background: #dbe5d3; overflow: hidden; }
+.media-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.media-card:hover .media-cover img { transform: scale(1.07); }
+.media-badge { position: absolute; top: 10px; right: 10px; }
+.avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -28px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 2;
+}
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #e9f7c8;
+}
+.media-body { padding: 12px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+.media-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.media-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+
+/* Galería de productos */
+.prod-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 14px 0; }
+@media (min-width: 640px) { .prod-strip { grid-template-columns: repeat(5, 1fr); } }
+.prod-item {
+  background: var(--card);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--sh);
+  text-align: center;
+  padding-bottom: 10px;
+  transition: transform 0.25s ease;
+}
+.prod-item:hover { transform: translateY(-4px); }
+.prod-item img { width: 100%; height: 96px; object-fit: cover; display: block; margin-bottom: 6px; }
+.prod-item strong { font-size: 0.92rem; display: block; }
+.prod-item small { color: var(--v2); font-weight: 700; font-size: 0.78rem; }
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: var(--card);
+  padding: 12px;
+  border-radius: 18px;
+  box-shadow: var(--sh);
+  margin: 14px 0;
+}
+.toolbar input, .toolbar select { flex: 1; min-width: 180px; min-height: 44px; padding: 8px 14px; }
+
+/* Forms & Buttons */
+label { display: block; font-weight: 600; margin: 12px 0 4px; }
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  min-height: 46px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--v2); box-shadow: 0 0 0 4px rgba(184, 227, 90, 0.45); outline: 0; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  text-align: center;
+  background: var(--verde);
+  color: #fff;
+  border: 0;
+  border-radius: 99px;
+  padding: 13px 20px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 14px;
+  transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
+}
+.btn:hover { filter: brightness(1.08); box-shadow: 0 8px 20px -6px rgba(20, 83, 45, 0.5); }
+.btn:active { transform: scale(0.97); }
+.btn.sec { background: transparent; color: var(--verde); border: 2px solid var(--verde); }
+.btn.warn { background: var(--zanahoria); color: #fff; }
+.btn.lima { background: var(--lima); color: var(--verde-osc); }
+.btn.small { width: auto; padding: 6px 14px; margin: 0; font-size: 0.84rem; }
+
+/* Demo Login Quick Pills */
+.demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; margin-top: 10px; }
+.demo-pill {
+  background: var(--card-alt);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: 0.82rem;
+  transition: all 0.2s;
+}
+.demo-pill:hover { border-color: var(--v2); background: var(--lima-suave); transform: translateY(-2px); }
+.demo-pill b { display: block; color: var(--verde); font-size: 0.9rem; }
+
+/* Tables & Progress Bars */
+table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+th { font-weight: 700; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.n { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+.ok { color: var(--v2); font-weight: 700; }
+.falta { color: var(--rojo); font-weight: 700; }
+
+.bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; min-width: 80px; }
+.bar i { display: block; height: 100%; background: var(--v2); transform-origin: left; animation: grow 0.8s ease both; }
+.bar i.o { background: var(--zanahoria); }
+
+.row { display: grid; grid-template-columns: 1fr 95px 95px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+
+/* Controls */
+.stars { display: flex; gap: 6px; flex-direction: row-reverse; justify-content: flex-end; }
+.stars input { position: absolute; opacity: 0; width: 1px; min-height: 0; }
+.stars label { font-size: 2.2rem; color: var(--line); cursor: pointer; margin: 0; }
+.stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: var(--zanahoria); }
+
+.radio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.radio label { border: 2px solid var(--line); border-radius: 12px; text-align: center; padding: 12px 4px; margin: 0; cursor: pointer; }
+.radio input { position: absolute; opacity: 0; width: 1px; min-height: 0; }
+.radio label:has(input:checked) { border-color: var(--v2); background: var(--lima-suave); font-weight: 800; }
+
+input[type=range] { padding: 0; min-height: 32px; accent-color: var(--v2); }
+
+/* ======= ESTILOS DEL SIMULADOR INTEGRADO (Carabayllo -> Puente Piedra) ======= */
+.sim-sub { color: var(--muted); margin: 0 0 16px; max-width: 72ch; }
+.sim-stage {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--sh);
+}
+.sim-stage svg { display: block; width: 100%; height: auto; }
+.sim-ctl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px 22px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--card-alt);
+  font-size: 0.85rem;
+}
+.sim-ctl label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  margin: 0;
+  font-weight: 500;
+}
+.sim-ctl b { color: var(--ink); font-weight: 700; }
+.sim-ctl select, .sim-ctl button {
+  font: inherit;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  min-height: 38px;
+}
+.sim-ctl button {
+  background: var(--verde);
+  color: #fff;
+  border: 0;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.sim-ctl button#reset {
+  background: var(--card);
+  color: var(--verde);
+  border: 1px solid var(--verde);
+}
+.sim-ctl button:hover { filter: brightness(1.08); }
+.sim-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+}
+.sim-row label {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+}
+.sim-row input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  accent-color: var(--v2);
+}
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.sim-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 16px;
+  font-size: 0.88rem;
+  overflow-x: auto;
+  box-shadow: var(--sh);
+}
+.sim-card h2 {
+  font-size: 1.08rem;
+  margin: 0 0 12px;
+  color: var(--verde);
+}
+.pr {
+  display: grid;
+  grid-template-columns: 105px 1fr 42px;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.pr small {
+  grid-column: 2 / 4;
+  color: var(--muted);
+  margin-top: -4px;
+  font-size: 0.78rem;
+}
+.meter {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--line);
+  overflow: hidden;
+}
+.meter i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.sim-card table th, .sim-card table td {
+  text-align: right;
+  padding: 6px 5px;
+  border-bottom: 1px solid var(--line);
+}
+.sim-card table th:first-child, .sim-card table td:first-child {
+  text-align: left;
+}
+.sim-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 18px;
+  line-height: 1.5;
+  background: rgba(255,255,255,0.7);
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+
+/* Steps */
+.pasos { counter-reset: p; list-style: none; padding: 0; }
+.pasos li { counter-increment: p; position: relative; padding: 4px 0 18px 48px; }
+.pasos li::before {
+  content: counter(p);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+#mapa { height: 380px; border-radius: var(--r); border: 1px solid var(--line); margin: 12px 0; z-index: 1; }
+
+/* Modal */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 28, 17, 0.65);
+  backdrop-filter: blur(5px);
+  display: none;
+  place-items: center;
+  padding: 16px;
+  z-index: 65;
+}
+.modal-bg.open { display: grid; }
+.modal-box {
+  background: var(--card);
+  border-radius: 24px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 22px;
+  box-shadow: var(--sh-lg);
+  animation: pageEnter 0.32s ease;
+}
+
+/* CHATBOT FLOTANTE INTERACTIVO */
+.chat-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 78px;
+  z-index: 55;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid var(--lima);
+  background: linear-gradient(135deg, var(--verde-osc), var(--v2));
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(10, 46, 24, 0.5);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chat-fab:hover { transform: scale(1.1) rotate(6deg); }
+.chat-fab-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--zanahoria);
+  border: 2px solid #fff;
+}
+@media (min-width: 840px) { .chat-fab { bottom: 24px; right: 24px; } }
+
+.chat-win {
+  position: fixed;
+  right: 16px;
+  bottom: 145px;
+  width: min(370px, calc(100vw - 32px));
+  height: 470px;
+  max-height: calc(100vh - 170px);
+  background: var(--card);
+  border-radius: 24px;
+  box-shadow: 0 24px 54px rgba(10, 46, 24, 0.45);
+  border: 1px solid var(--line);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(20px) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.chat-win.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+@media (min-width: 840px) { .chat-win { bottom: 92px; right: 24px; } }
+
+.chat-head {
+  background: linear-gradient(135deg, var(--verde-osc), var(--verde));
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-head-info { display: flex; align-items: center; gap: 10px; }
+.chat-bot-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--lima);
+  color: var(--verde-osc);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+.chat-close { background: none; border: 0; color: #fff; font-size: 1.3rem; cursor: pointer; padding: 2px 6px; }
+
+.chat-msgs {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--card-alt);
+}
+.msg {
+  max-width: 84%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  animation: pageEnter 0.25s ease;
+}
+.msg.bot { background: #fff; color: var(--ink); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--line); }
+.msg.usr { background: var(--verde); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+.chat-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  scrollbar-width: none;
+}
+.chat-chips::-webkit-scrollbar { display: none; }
+.chat-chips button {
+  background: var(--lima-suave);
+  color: var(--verde-osc);
+  border: 1px solid #c5e384;
+  border-radius: 99px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chat-chips button:hover { background: var(--lima); }
+
+.chat-form {
+  display: flex;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid var(--line);
+}
+.chat-form input { min-height: 40px; padding: 8px 12px; font-size: 0.88rem; border-radius: 99px; }
+.chat-form button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--verde);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Toast & Footer */
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 76px;
+  transform: translate(-50%, -20px);
+  background: var(--verde-osc);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 99px;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s;
+  z-index: 75;
+  box-shadow: var(--sh-lg);
+  font-weight: 600;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+.foot {
+  max-width: 1060px;
+  margin: 34px auto 0;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Animación de entrada de vista/pestaña */
+#app.in > * { animation: pageEnter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+#app.in > *:nth-child(2) { animation-delay: 0.05s; }
+#app.in > *:nth-child(3) { animation-delay: 0.1s; }
+#app.in > *:nth-child(4) { animation-delay: 0.15s; }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes grow { from { transform: scaleX(0); } }
+@media print { .top, .nav, .btn, .toast, .chat-fab, .chat-win, .bg-leaves { display: none !important; } body { background: #fff; padding: 0; } }
+</style>
+</head>
+<body>
+
+<!-- Trasfondo decorativo con hojas vectoriales animadas -->
+<div class="bg-leaves" aria-hidden="true">
+  <svg class="leaf" viewBox="0 0 64 64" fill="#1f7a45"><path d="M54 10C30 10 12 26 10 54c28-2 44-20 44-44zM18 46c6-12 16-22 28-28-12 10-20 20-28 28z"/></svg>
+  <svg class="leaf" viewBox="0 0 64 64" fill="#14532d"><path d="M54 10C30 10 12 26 10 54c28-2 44-20 44-44z"/></svg>
+  <svg class="leaf" viewBox="0 0 64 64" fill="#65a30d"><path d="M54 10C30 10 12 26 10 54c28-2 44-20 44-44z"/></svg>
+  <svg class="leaf" viewBox="0 0 64 64" fill="#1f7a45"><path d="M54 10C30 10 12 26 10 54c28-2 44-20 44-44z"/></svg>
+</div>
+
+<!-- Header con Logotipo Vectorial Personalizado -->
+<header class="top">
+  <a class="logo" href="#inicio" aria-label="HuertoDirecto Inicio">
+    <span class="logo-mark">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M16 26V13" stroke="#0a2e18" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M16 15C16 9 22 6 26 6C26 12 22 15 16 15Z" fill="#0a2e18"/>
+        <path d="M16 18C16 13 10 10 6 10C6 16 10 18 16 18Z" fill="#14532d"/>
+        <path d="M7 23C9 26.5 23 26.5 25 23" stroke="#f97316" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="logo-text">
+      Huerto<span>Directo</span>
+      <span class="logo-sub">Valle del Chillón</span>
+    </span>
+  </a>
+  <div id="sesion"></div>
+</header>
+
+<nav class="nav" id="nav" aria-label="Menú principal"></nav>
+
+<main class="wrap" id="app"></main>
+
+<!-- Modal de detalles -->
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-box" id="modal-body"></div>
+</div>
+
+<!-- Asistente Virtual / Chatbot Flotante -->
+<button class="chat-fab" id="chat-toggle" aria-label="Abrir asistente virtual de consultas">
+  <span class="chat-fab-badge"></span>
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+</button>
+
+<section class="chat-win" id="chat-win" aria-label="Asistente HuertoBot">
+  <div class="chat-head">
+    <div class="chat-head-info">
+      <div class="chat-bot-avatar">🌱</div>
+      <div>
+        <strong style="display:block;font-size:.95rem;line-height:1.1">HuertoBot · Asistente</strong>
+        <small style="color:#b8e35a;font-size:.75rem">● En línea · Consultas al instante</small>
+      </div>
+    </div>
+    <button class="chat-close" id="chat-close" aria-label="Cerrar chat">✕</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="msg bot">¡Hola! 👋 Soy <strong>HuertoBot</strong>. Puedo ayudarte con precios semanales, stock disponible, productores del Chillón, comedores o cómo hacer tu pedido. ¿Qué deseas consultar?</div>
+  </div>
+  <div class="chat-chips" id="chat-chips">
+    <button type="button" data-q="¿Qué productos tienen stock hoy?">🥬 Stock disponible</button>
+    <button type="button" data-q="¿Cuáles son los precios por kilo?">💰 Precios por kg</button>
+    <button type="button" data-q="¿Quiénes son los productores?">👨‍🌾 Productores</button>
+    <button type="button" data-q="¿Cómo entro al panel de prueba?">🔑 Accesos demo</button>
+  </div>
+  <form class="chat-form" id="chat-form">
+    <input id="chat-in" type="text" placeholder="Escribe tu consulta aquí..." autocomplete="off" required>
+    <button type="submit" aria-label="Enviar consulta">➤</button>
+  </form>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+
+<footer class="foot">
+  <span>Semana <strong id="sem"></strong> · Proyecto académico UNFV – Medio Ambiente y Desarrollo Sostenible</span>
+  <span><a href="https://wa.me/51999999999" target="_blank" rel="noopener">Soporte WhatsApp</a> · <a href="#" id="foot-reset">Restaurar datos demo</a></span>
+</footer>
+
+<script>
+/* ============ CONFIGURACIÓN Y UTILIDADES ============ */
+const HUB = [-11.8965, -77.0360];
+const FACTORES = [0.25, 0.32];
+const DIAS = ["Lun", "Mié", "Vie", "Sáb"];
+
+const SEMANA = (() => {
+  const d = new Date();
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - y) / 864e5 + 1) / 7);
+})();
+document.getElementById("sem").textContent = SEMANA;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = s => document.querySelector(s);
+const fmt = (n, d = 0) => n.toLocaleString("es-PE", { maximumFractionDigits: d, minimumFractionDigits: d });
+
+/* Función para ir suave a cualquier sección interna de la pestaña */
+function irASeccion(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    const y = el.getBoundingClientRect().top + window.scrollY - 125;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  }
+}
+
+/* ============ BASE DE DATOS INICIAL ============ */
+const SEED = () => ({
+  productos: [
+    { id: 1, nombre: "Lechuga", unidad: "kg", img: "https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" },
+    { id: 2, nombre: "Zanahoria", unidad: "kg", img: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" },
+    { id: 3, nombre: "Cebolla Roja", unidad: "kg", img: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" },
+    { id: 4, nombre: "Col Corazón", unidad: "kg", img: "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?auto=format&fit=crop&w=500&q=80", temp: "Otoño - Invierno" },
+    { id: 5, nombre: "Tomate", unidad: "kg", img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80", temp: "Primavera - Verano" },
+    { id: 6, nombre: "Papa Yungay", unidad: "kg", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" },
+    { id: 7, nombre: "Camote Morado", unidad: "kg", img: "https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" },
+    { id: 8, nombre: "Choclo Serrano", unidad: "kg", img: "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=500&q=80", temp: "Verano - Otoño" },
+    { id: 9, nombre: "Pepino", unidad: "kg", img: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?auto=format&fit=crop&w=500&q=80", temp: "Primavera - Verano" },
+    { id: 10, nombre: "Espinaca", unidad: "kg", img: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=500&q=80", temp: "Todo el año" }
+  ],
+  productores: [
+    {
+      id: 1, nombre: "Juan Pérez Huamán", asoc: "Asoc. Orgánicos del Chillón", sector: "Punchauca, Carabayllo",
+      ha: 1.5, exp: 18, sello: "Agroecológico", especialidad: "Hortalizas de hoja y tomate",
+      lat: -11.8890, lng: -77.0310,
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=700&q=80",
+      bio: "Agricultor de segunda generación en Punchauca. Utiliza riego tecnificado por goteo y compostaje propio."
+    },
+    {
+      id: 2, nombre: "María Condori Quispe", asoc: "Asoc. Orgánicos del Chillón", sector: "Chocas Bajo, Carabayllo",
+      ha: 0.8, exp: 12, sello: "Sin pesticidas", especialidad: "Col, espinaca y hierbas aromáticas",
+      lat: -11.8750, lng: -77.0220,
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?auto=format&fit=crop&w=700&q=80",
+      bio: "Lidera un colectivo de mujeres agricultoras enfocadas en cultivos de ciclo corto y rotación de suelos."
+    },
+    {
+      id: 3, nombre: "Pedro Vilca Mamani", asoc: "Independiente", sector: "Caballero, Carabayllo",
+      ha: 2.2, exp: 25, sello: "Buenas Prácticas", especialidad: "Tubérculos y cebolla roja",
+      lat: -11.8640, lng: -77.0150,
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=700&q=80",
+      bio: "Especialista en papa y cebolla de alta conservación, abasteciendo directamente a comedores del cono norte."
+    },
+    {
+      id: 4, nombre: "Rosaura Tello Mendoza", asoc: "Coop. Agraria Valle Verde", sector: "Huacoy, Carabayllo",
+      ha: 1.3, exp: 15, sello: "Agroecológico", especialidad: "Zanahoria, betarraga y rabanito",
+      lat: -11.8920, lng: -77.0440,
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=700&q=80",
+      bio: "Implementó biohuertos familiares que hoy escalaron a producción semanal continua para ollas comunes."
+    },
+    {
+      id: 5, nombre: "Teófilo Carhuapoma", asoc: "Coop. Agraria Valle Verde", sector: "Lomas de Carabayllo",
+      ha: 1.8, exp: 20, sello: "Riego Tecnificado", especialidad: "Choclo, camote y zapallo",
+      lat: -11.8815, lng: -77.0510,
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=700&q=80",
+      bio: "Cosecha el mismo día de la entrega para garantizar máxima dulzura y frescura en cada saco."
+    },
+    {
+      id: 6, nombre: "Lucía Paredes Rojas", asoc: "Asoc. Mujeres del Río", sector: "San Pedro de Carabayllo",
+      ha: 1.1, exp: 9, sello: "Orgánico Participativo", especialidad: "Lechuga hidropónica y pepino",
+      lat: -11.9010, lng: -77.0390,
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1558449028-b53a39d100fc?auto=format&fit=crop&w=700&q=80",
+      bio: "Combina cultivo tradicional en surco con invernaderos rústicos para proteger hortalizas delicadas."
+    },
+    {
+      id: 7, nombre: "Gregorio Yupanqui", asoc: "Asoc. Orgánicos del Chillón", sector: "Huarangal, Carabayllo",
+      ha: 2.5, exp: 30, sello: "Buenas Prácticas", especialidad: "Papa, camote y cebolla",
+      lat: -11.8550, lng: -77.0090,
+      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1595855759920-86582396756a?auto=format&fit=crop&w=700&q=80",
+      bio: "Productor con mayor capacidad de volumen del valle; coordina el acopio temprano en la zona norte."
+    },
+    {
+      id: 8, nombre: "Elena Gutiérrez Soto", asoc: "Independiente", sector: "El Progreso, Carabayllo",
+      ha: 0.9, exp: 11, sello: "Sin pesticidas", especialidad: "Tomate italiano y espinaca",
+      lat: -11.9050, lng: -77.0320,
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+      parcelaImg: "https://images.unsplash.com/photo-1515150144380-bca9f1650ed9?auto=format&fit=crop&w=700&q=80",
+      bio: "Entrega directa sin intermediarios con selección manual por calibre y madurez óptima."
+    }
+  ],
+  comedores: [
+    { id: 1, nombre: "Comedor Virgen de Fátima", tipo: "comedor popular", dir: "Zapallal, Puente Piedra", lat: -11.8420, lng: -77.0900, usuarios: 70, img: "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80" },
+    { id: 2, nombre: "Olla Común Nueva Esperanza", tipo: "olla común", dir: "Shangrilá, Puente Piedra", lat: -11.8570, lng: -77.0770, usuarios: 45, img: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80" },
+    { id: 3, nombre: "Comedor Santa Rosa", tipo: "comedor popular", dir: "Centro de Puente Piedra", lat: -11.8690, lng: -77.0740, usuarios: 80, img: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80" },
+    { id: 4, nombre: "Olla Común Unidos Venceremos", tipo: "olla común", dir: "Laderas del Chillón", lat: -11.8800, lng: -77.0680, usuarios: 38, img: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=600&q=80" },
+    { id: 5, nombre: "Comedor San Martín", tipo: "comedor popular", dir: "Ancón Km 28", lat: -11.8510, lng: -77.0830, usuarios: 65, img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80" },
+    { id: 6, nombre: "Comedor Los Jardines", tipo: "comedor popular", dir: "Los Jardines, Puente Piedra", lat: -11.8740, lng: -77.0620, usuarios: 55, img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80" }
+  ],
+  ofertas: [
+    [1, 1, 160, 1.9], [6, 1, 140, 1.8],
+    [4, 2, 130, 1.5], [10, 2, 95, 2.2],
+    [3, 3, 320, 1.3], [6, 3, 280, 1.4],
+    [2, 4, 240, 1.6], [9, 4, 110, 1.7],
+    [7, 5, 210, 1.5], [8, 5, 180, 2.1],
+    [1, 6, 120, 2.0], [9, 6, 90, 1.6],
+    [6, 7, 350, 1.35], [7, 7, 190, 1.45],
+    [5, 8, 170, 2.5], [10, 8, 85, 2.1]
+  ].map(([producto, productor, cant, precio], i) => ({ id: i + 1, productor, producto, cant, precio })),
+  pedidos: {
+    1: [[1, 60, "Mié"], [2, 80, "Mié"], [3, 60, "Vie"], [6, 90, "Vie"], [10, 30, "Mié"]],
+    2: [[1, 45, "Mié"], [2, 65, "Mié"], [3, 50, "Vie"], [7, 70, "Vie"], [8, 40, "Sáb"]],
+    3: [[1, 80, "Mié"], [2, 95, "Mié"], [3, 85, "Vie"], [5, 60, "Mié"], [6, 120, "Vie"]],
+    4: [[2, 55, "Vie"], [4, 45, "Vie"], [6, 80, "Mié"], [7, 60, "Vie"]],
+    5: [[1, 50, "Mié"], [2, 85, "Mié"], [3, 70, "Vie"], [5, 50, "Sáb"], [9, 40, "Mié"]],
+    6: [[3, 65, "Mié"], [4, 50, "Vie"], [6, 100, "Vie"], [8, 60, "Sáb"], [10, 35, "Mié"]]
+  },
+  precios: { 1: 1.95, 2: 1.60, 3: 1.30, 4: 1.50, 5: 2.50, 6: 1.40, 7: 1.48, 8: 2.10, 9: 1.65, 10: 2.15 },
+  entregas: [],
+  confirmaciones: {},
+  nextOferta: 200
+});
+
+const STORAGE_KEY = "huertodirecto-v4";
+let DB;
+try { DB = JSON.parse(localStorage.getItem(STORAGE_KEY)) || SEED(); } catch (e) { DB = SEED(); }
+const save = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(DB)); } catch (e) {} };
+
+let USER = null, FLASH = "";
+try { USER = JSON.parse(sessionStorage.getItem("hd-user-v4")); } catch (e) {}
+
+const USUARIOS = { coord: ["coord123", "coordinador", "Coordinación Valle", null] };
+for (let i = 1; i <= 6; i++) USUARIOS["comedor" + i] = ["demo123", "comedor", "Dirigente Comedor " + i, i];
+for (let i = 1; i <= 8; i++) USUARIOS["productor" + i] = ["demo123", "productor", DB.productores[i - 1]?.nombre || ("Productor " + i), i];
+
+const prod = id => DB.productos.find(p => p.id == id);
+const com = id => DB.comedores.find(c => c.id == id);
+const prd = id => DB.productores.find(p => p.id == id);
+const go = h => { location.hash = h; };
+const flash = m => { FLASH = m; };
+
+/* ============ ALGORITMOS DE RUTEO Y CONSOLIDACIÓN ============ */
+function haversine(a, b) {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dl = rad(b[0] - a[0]), dn = rad(b[1] - a[1]);
+  const x = Math.sin(dl / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dn / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+function distTotal(ordenIds) {
+  if (!ordenIds.length) return 0;
+  const pts = [HUB, ...ordenIds.map(id => [com(id).lat, com(id).lng]), HUB];
+  return pts.slice(0, -1).reduce((s, p, i) => s + haversine(p, pts[i + 1]), 0);
+}
+
+function optimizarRuta(ids) {
+  let pend = ids.map(com), actual = HUB, ruta = [];
+  while (pend.length) {
+    const sig = pend.reduce((m, c) => haversine(actual, [c.lat, c.lng]) < haversine(actual, [m.lat, m.lng]) ? c : m);
+    ruta.push(sig.id);
+    actual = [sig.lat, sig.lng];
+    pend = pend.filter(c => c !== sig);
+  }
+  let mejoro = true;
+  while (mejoro && ruta.length > 3) {
+    mejoro = false;
+    for (let i = 0; i < ruta.length - 1; i++) {
+      for (let k = i + 1; k < ruta.length; k++) {
+        const candidata = [...ruta.slice(0, i), ...ruta.slice(i, k + 1).reverse(), ...ruta.slice(k + 1)];
+        if (distTotal(candidata) + 0.01 < distTotal(ruta)) {
+          ruta = candidata;
+          mejoro = true;
+        }
+      }
+    }
+  }
+  return ruta;
+}
+
+const kmRuta = () => distTotal(DB.entregas.map(e => e.comedor));
+
+function consolidado() {
+  return DB.productos.map(p => {
+    const pide = Object.values(DB.pedidos).flat().filter(l => l[0] === p.id).reduce((s, l) => s + l[1], 0);
+    const of = DB.ofertas.filter(o => o.producto === p.id);
+    const ofrece = of.reduce((s, o) => s + o.cant, 0);
+    const prom = of.length ? (of.reduce((s, o) => s + o.precio, 0) / of.length) : null;
+    return { ...p, pide, ofrece, prom, acordado: DB.precios[p.id] };
+  });
+}
+
+const estadoBadge = f => f.pide === 0 ? '<span class="muted">Sin pedidos</span>'
+  : f.ofrece >= f.pide ? '<span class="ok">✓ Cubierto</span>' : `<span class="falta">Falta ${Math.round(f.pide - f.ofrece)} kg</span>`;
+
+const tablaConsolidado = () => `<table>
+  <thead><tr><th>Producto</th><th class="n">Piden (kg)</th><th class="n">Ofrecen (kg)</th><th>Cobertura</th><th>Estado</th></tr></thead><tbody>` +
+  consolidado().map(f => {
+    const pct = f.pide ? Math.min(100, Math.round(100 * f.ofrece / f.pide)) : 100;
+    return `<tr>
+      <td><strong>${esc(f.nombre)}</strong></td>
+      <td class="n">${Math.round(f.pide)}</td>
+      <td class="n">${Math.round(f.ofrece)}</td>
+      <td><div class="bar"><i class="${f.ofrece >= f.pide ? "" : "o"}" style="width:${pct}%"></i></div></td>
+      <td>${estadoBadge(f)}</td>
+    </tr>`;
+  }).join("") + `</tbody></table>`;
+
+/* ============ SIMULADOR DIDÁCTICO (De las chacras del Carabayllo a Puente Piedra) ============ */
+let simRaf = null;
+
+function initSimulador() {
+  if (simRaf) {
+    cancelAnimationFrame(simRaf);
+    simRaf = null;
+  }
+  const byId = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const route = byId("route");
+  if (!route) return;
+
+  const PR = [
+    { k: "tomate", n: "Tomate", e: "🍅", d: 14, f: 1.3, p: 1.6, c: "#d9483b" },
+    { k: "lechuga", n: "Lechuga", e: "🥬", d: 10, f: 1, p: 1, c: "#4fa152" },
+    { k: "fresa", n: "Fresa", e: "🍓", d: 7, f: 2, p: 6, c: "#c2185b" },
+    { k: "papa", n: "Papa", e: "🥔", d: 60, f: .3, p: 1.2, c: "#a07a3c" },
+    { k: "zanahoria", n: "Zanahoria", e: "🥕", d: 28, f: .5, p: 1.1, c: "#e8812a" },
+    { k: "platano", n: "Plátano", e: "🍌", d: 12, f: 1, p: 1.5, c: "#d4b400" },
+    { k: "uva", n: "Uva", e: "🍇", d: 14, f: 1.4, p: 5, c: "#5b3a9b" },
+    { k: "palta", n: "Palta", e: "🥑", d: 10, f: 1.2, p: 7, c: "#5a7d1e" }
+  ];
+  const SPD = [60, 45, 30], ROUGH = [.1, .25, .5], Q10 = 2.2, LOAD = 2000, GAP = .6;
+  const RL = route.getTotalLength();
+
+  const rw = byId("rows");
+  for (let i = 0; i < 7; i++) {
+    const l = document.createElementNS(NS, "path");
+    l.setAttribute("d", "M" + (10 + i * 30) + " 380 L" + (40 + i * 30) + " 290");
+    rw.appendChild(l);
+  }
+
+  const nd = byId("nodes");
+  [[0, "Chacras del Carabayllo"], [.15, "Acopio"], [.82, "Mercado de Puente Piedra"], [.99, "Hogar"]].forEach((n, i) => {
+    const p = route.getPointAtLength(n[0] * RL);
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", p.x);
+    c.setAttribute("cy", p.y);
+    c.setAttribute("r", 7);
+    c.setAttribute("fill", "#fff");
+    c.setAttribute("stroke", "#1f2b27");
+    c.setAttribute("stroke-width", 2);
+    nd.appendChild(c);
+
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", Math.min(940, Math.max(60, p.x)));
+    t.setAttribute("y", p.y + (i % 2 ? 34 : -18));
+    t.textContent = n[1];
+    nd.appendChild(t);
+  });
+
+  const tg = byId("trucks"), TR = [];
+  PR.forEach((p, i) => {
+    const g = document.createElementNS(NS, "g");
+    g.innerHTML = '<rect x="-22" y="-22" width="30" height="16" fill="#e8e2d0" stroke="#444"/><rect x="8" y="-17" width="12" height="11" fill="#c9503b" stroke="#444"/><circle cx="-12" cy="-4" r="4" fill="#222"/><circle cx="12" cy="-4" r="4" fill="#222"/><rect class="ld" x="-20" y="-20" width="26" height="12" fill="#2f8a4b"/><text x="-8" y="-26" font-size="16" text-anchor="middle">' + p.e + '</text>';
+    tg.appendChild(g);
+    TR.push({ g: g, ld: g.querySelector(".ld"), p: p, st: i * GAP });
+  });
+
+  [-20, 20].forEach(o => {
+    const l = route.cloneNode();
+    l.removeAttribute("id");
+    l.setAttribute("stroke", "#f3e9b0");
+    l.setAttribute("stroke-width", 1.5);
+    l.setAttribute("stroke-dasharray", "6 12");
+    l.setAttribute("opacity", .6);
+    l.setAttribute("transform", "translate(0," + o + ")");
+    nd.parentNode.insertBefore(l, nd);
+  });
+
+  const cg = document.createElementNS(NS, "g");
+  tg.parentNode.insertBefore(cg, tg);
+  const CARS = [
+    ["#3a7bd5", 1, 0, .035], ["#e0a526", -1, .2, .045], ["#c9503b", 1, .35, .03], ["#7a8b99", -1, .5, .04],
+    ["#2f8a4b", 1, .6, .05], ["#f2f2f2", -1, .75, .032], ["#8e44ad", 1, .85, .04], ["#d35400", -1, .95, .038]
+  ].map(c => {
+    const g = document.createElementNS(NS, "g");
+    g.innerHTML = '<rect x="-10" y="-10" width="20" height="9" rx="3" fill="' + c[0] + '" stroke="#333"/><rect x="-4" y="-9" width="9" height="4" fill="#cfe8f5"/><circle cx="-6" cy="-1" r="2.4" fill="#222"/><circle cx="6" cy="-1" r="2.4" fill="#222"/>';
+    cg.appendChild(g);
+    return { g: g, d: c[1], p: c[2], s: c[3] };
+  });
+
+  function moveCars(dt) {
+    CARS.forEach(c => {
+      c.p = (c.p + c.s * dt) % 1;
+      const u = c.d > 0 ? c.p : 1 - c.p, pt = route.getPointAtLength(u * RL);
+      c.g.setAttribute("transform", "translate(" + pt.x + "," + (pt.y + (c.d > 0 ? 24 : -24)) + ") scale(" + (c.d > 0 ? 1 : -1) + ",1)");
+    });
+  }
+  moveCars(0);
+
+  const gv = id => +byId(id).value;
+
+  function build(P, ct, cm, X = {}) {
+    const amb = gv("amb"), D = gv("dist") + (X.dd || 0), ro = +byId("road").value, dl = gv("dly") + (X.dh || 0);
+    const v = SPD[ro], k = 30 / (P.d * 24), vib = ROUGH[ro] * P.f, tv = ct ? 6 : amb + 6;
+    const S = [
+      { n: "Cosecha y acopio", d: 3, T: ct ? 6 : amb, hd: 3, vb: 0, a: 0, b: .15 },
+      { n: "En carretera", d: D / 2 / v, T: tv, hd: 0, vb: vib, a: .15, b: .425 },
+      { n: "Retraso en ruta", d: dl, T: tv, hd: 0, vb: 0, a: .425, b: .425 },
+      { n: "En carretera", d: D / 2 / v, T: tv, hd: 0, vb: vib, a: .425, b: .7 },
+      { n: "Mercado del barrio", d: 12, T: cm ? 8 : amb, hd: 3, vb: 0, a: .7, b: .95 }
+    ];
+    let t = 0, q = 100, pts = [[0, 100]];
+    S.forEach(s => {
+      s.t0 = t;
+      q = Math.max(0, q - s.hd);
+      pts.push([t, q]);
+      const n = Math.max(1, Math.ceil(s.d / .1)), dt = s.d / n;
+      for (let i = 0; i < n; i++) {
+        q = Math.max(0, q - (k * Math.pow(Q10, (s.T - 5) / 10) + s.vb) * dt);
+        t += dt;
+        pts.push([t, q]);
+      }
+      s.t1 = t;
+    });
+    const m = Math.min(100, (100 - q) * 1.2), sell = LOAD * (1 - m / 100), fl = 3 * D * (ct ? 1.3 : 1) + (cm ? .05 * LOAD : 0);
+    return { S: S, pts: pts, T: t, q: q, m: m, cost: sell > 0 ? (P.p * LOAD + fl) / sell : NaN, kg: sell };
+  }
+
+  let cur = [], A = [], B = [], tsim = 0, END = 0, play = true, last = null;
+
+  function setup() {
+    if (!byId("ct")) return;
+    const ct = byId("ct").checked, cm = byId("cm").checked;
+    cur = PR.map(p => build(p, ct, cm));
+    A = PR.map(p => build(p, false, false));
+    B = PR.map(p => build(p, true, true));
+    tsim = 0;
+    END = Math.max(...cur.map((r, i) => r.T + TR[i].st));
+
+    let h = "";
+    PR.forEach((p, i) => {
+      h += '<tr><td>' + p.e + ' ' + p.n + '</td><td>' + A[i].m.toFixed(0) + ' %</td><td>' + B[i].m.toFixed(0) + ' %</td><td>' + A[i].cost.toFixed(2) + '</td><td>' + B[i].cost.toFixed(2) + '</td></tr>';
+    });
+    byId("cmp").innerHTML = h;
+
+    let sa = 0, sb = 0;
+    PR.forEach((p, i) => { sa += A[i].kg; sb += B[i].kg; });
+    const ex = Math.round(sb - sa);
+    byId("msg").textContent = ex > 20
+      ? "Con frío se salvan unos " + ex.toLocaleString("es-PE") + " kg de los " + (LOAD * PR.length).toLocaleString("es-PE") + " kg que salen de las chacras. El alimento más delicado es " + PR.slice().sort((a, b) => A[PR.indexOf(b)].m - A[PR.indexOf(a)].m)[0].n.toLowerCase() + "."
+      : "En estas condiciones el frío casi no cambia el resultado. Sube la distancia, la temperatura o el retraso para ver su efecto.";
+
+    const Tr = PR.map(p => build(p, false, false, { dd: 30, dh: 6 }));
+    let sd = 0, st = 0, rw2 = "";
+    PR.forEach((p, i) => {
+      const t = Tr[i].cost * (1 + gv("mg") / 100), d = cur[i].cost;
+      if (!isFinite(t) || !isFinite(d)) return;
+      sd += d; st += t;
+      rw2 += '<tr><td>' + p.e + ' ' + p.n + '</td><td>' + t.toFixed(2) + '</td><td>' + d.toFixed(2) + '</td><td>' + (t - d).toFixed(2) + '</td><td>' + ((1 - d / t) * 100).toFixed(0) + ' %</td></tr>';
+    });
+    const ixv = st > 0 ? (1 - sd / st) * 100 : 0, fam = st > 0 ? (st - sd) / PR.length * 20 : 0, ok = ixv > 0;
+    byId("ix").innerHTML = '<div class="pr" style="grid-template-columns:90px 1fr"><b style="font-size:2rem;color:' + (ok ? "var(--good)" : "var(--bad)") + '">' + ixv.toFixed(0) + ' %</b><div class="meter"><i style="width:' + Math.max(0, Math.min(100, ixv)) + '%;background:' + (ok ? "var(--good)" : "var(--bad)") + '"></i></div></div><p style="margin:6px 0 10px">' + (ok ? 'Comprar directo en la chacra abarata en promedio ' + ixv.toFixed(0) + ' % cada kilo vendible frente a la cadena tradicional. Una familia que compre 20 kg al mes de estos alimentos se ahorraría unos S/ ' + fam.toFixed(2) + ' al mes.' : 'En estas condiciones el envío directo no ahorra frente a la cadena tradicional: la distancia, el retraso o la merma se comen la ventaja. Prueba con frío o reduce el retraso.') + '</p><table><thead><tr><th>Alimento</th><th>S/ por kg cadena tradicional</th><th>S/ por kg directo</th><th>Ahorro S/ por kg</th><th>Ahorro</th></tr></thead><tbody>' + rw2 + '</tbody></table>';
+
+    byId("mv").textContent = gv("mg") + " %";
+    byId("dv").textContent = gv("dist") + " km";
+    byId("tv").textContent = gv("amb") + " °C";
+    byId("rv").textContent = gv("dly") + " h";
+    byId("sv").textContent = gv("spd").toFixed(1) + " h por segundo";
+    byId("ttl").textContent = "Carabayllo → Puente Piedra · " + gv("dist") + " km";
+
+    const c = byId("ch");
+    let s = '<path d="M20 10 V95 H290" fill="none" stroke="var(--line)"/><text x="2" y="14" font-size="9" fill="var(--muted)">100</text><text x="2" y="98" font-size="9" fill="var(--muted)">0</text><text x="262" y="108" font-size="9" fill="var(--muted)">' + END.toFixed(0) + ' h</text>';
+    cur.forEach((r, i) => {
+      let d = "";
+      r.pts.forEach((p, j) => {
+        d += (j ? "L" : "M") + (20 + (p[0] + TR[i].st) / END * 270).toFixed(1) + " " + (95 - p[1] * .85).toFixed(1);
+      });
+      s += '<path d="' + d + '" fill="none" stroke="' + PR[i].c + '" stroke-width="2"/><circle id="d' + i + '" r="3.5" fill="' + PR[i].c + '" cx="20" cy="10"/>';
+    });
+    c.innerHTML = s;
+
+    let l = "";
+    PR.forEach((p, i) => {
+      l += '<div class="pr"><span>' + p.e + ' ' + p.n + '</span><div class="meter"><i id="b' + i + '"></i></div><b id="q' + i + '">100</b><small id="s' + i + '"></small></div>';
+    });
+    byId("live").innerHTML = l;
+  }
+
+  function qAt(r, t) {
+    const p = r.pts;
+    if (t >= r.T) return p[p.length - 1][1];
+    for (let i = 1; i < p.length; i++) {
+      if (p[i][0] >= t) {
+        const a = p[i - 1], b = p[i];
+        return b[0] === a[0] ? b[1] : a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return 0;
+  }
+
+  const col = q => q >= 80 ? "var(--good)" : q >= 60 ? "var(--mid)" : "var(--bad)";
+
+  function draw() {
+    if (!byId("clk")) return;
+    byId("clk").textContent = "Hora " + Math.min(tsim, END).toFixed(1) + " desde la primera salida";
+    let blk = 0;
+    cur.forEach((r, i) => {
+      const tl = Math.max(0, Math.min(r.T, tsim - TR[i].st)), q = qAt(r, tl);
+      let s = r.S[r.S.length - 1];
+      for (let j = 0; j < r.S.length; j++) {
+        if (r.S[j].d > 0 && tl <= r.S[j].t1) { s = r.S[j]; break; }
+      }
+      const f = s.d > 0 ? Math.min(1, Math.max(0, (tl - s.t0) / s.d)) : 0;
+      const pt = route.getPointAtLength((s.a + (s.b - s.a) * f) * RL);
+      TR[i].g.setAttribute("transform", "translate(" + pt.x + "," + (pt.y + (i - 3.5) * 4.5) + ") scale(.8)");
+      TR[i].ld.setAttribute("fill", col(q));
+      const st = tsim < TR[i].st ? "Esperando salida" : (tl >= r.T ? "Llegó al mercado" : s.n);
+      if (st === "Retraso en ruta") blk = 1;
+      byId("b" + i).style.width = q + "%";
+      byId("b" + i).style.background = col(q);
+      byId("q" + i).textContent = q.toFixed(0);
+      byId("s" + i).textContent = st;
+      const d = byId("d" + i);
+      if (d) {
+        d.setAttribute("cx", 20 + (tl + TR[i].st) / END * 270);
+        d.setAttribute("cy", 95 - q * .85);
+      }
+    });
+    byId("blk").setAttribute("opacity", blk);
+  }
+
+  function frame(ts) {
+    if (!byId("sc")) { simRaf = null; return; }
+    if (last === null) last = ts;
+    const dt = Math.min(.05, (ts - last) / 1000);
+    last = ts;
+    if (play) {
+      moveCars(dt);
+      tsim += dt * gv("spd");
+      if (tsim >= END) {
+        tsim = END;
+        play = false;
+        byId("play").textContent = "Repetir";
+      }
+    }
+    draw();
+    simRaf = requestAnimationFrame(frame);
+  }
+
+  function restart() {
+    setup();
+    play = true;
+    byId("play").textContent = "Pausar";
+  }
+
+  byId("play").onclick = function () {
+    if (tsim >= END) {
+      tsim = 0;
+      play = true;
+      byId("play").textContent = "Pausar";
+    } else {
+      play = !play;
+      byId("play").textContent = play ? "Pausar" : "Reanudar";
+    }
+  };
+  byId("reset").onclick = restart;
+  ["ct", "cm", "road", "dist", "amb", "dly", "mg"].forEach(id => {
+    byId(id).addEventListener("input", restart);
+    byId(id).addEventListener("change", restart);
+  });
+  byId("spd").addEventListener("input", () => {
+    byId("sv").textContent = gv("spd").toFixed(1) + " h por segundo";
+  });
+
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) play = false;
+  setup();
+  if (!play) byId("play").textContent = "Reanudar";
+  simRaf = requestAnimationFrame(frame);
+}
+
+/* ============ MODAL Y TOAST ============ */
+function toast(m) {
+  const t = $("#toast");
+  t.textContent = m;
+  t.classList.add("on");
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => t.classList.remove("on"), 2700);
+}
+
+function openModal(html) {
+  $("#modal-body").innerHTML = html;
+  $("#modal").classList.add("open");
+}
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").classList.remove("open"); });
+
+function verProductor(id) {
+  const p = prd(id);
+  if (!p) return;
+  const ofertas = DB.ofertas.filter(o => o.productor === p.id);
+  openModal(`
+    <img src="${esc(p.parcelaImg)}" alt="Parcela de ${esc(p.nombre)}" style="width:100%;height:185px;object-fit:cover;border-radius:16px">
+    <div style="display:flex;align-items:center;gap:14px;margin-top:-32px;padding:0 10px;position:relative">
+      <img src="${esc(p.avatar)}" alt="${esc(p.nombre)}" class="avatar" style="width:72px;height:72px">
+      <div style="background:#fff;padding:6px 12px;border-radius:12px;box-shadow:var(--sh)">
+        <h2 style="margin:0">${esc(p.nombre)}</h2>
+        <span class="muted" style="font-size:.88rem">${esc(p.asoc)}</span>
+      </div>
+    </div>
+    <div class="media-meta" style="margin-top:14px">
+      <span class="chip">${esc(p.sello)}</span>
+      <span class="chip soft">📍 ${esc(p.sector)}</span>
+      <span class="chip soft">🌾 ${p.ha} hectáreas · ${p.exp} años exp.</span>
+    </div>
+    <p>${esc(p.bio)}</p>
+    <h3>Oferta disponible esta semana</h3>
+    ${ofertas.length ? `<table><tr><th>Producto</th><th class="n">Disponible</th><th class="n">Precio</th></tr>` +
+      ofertas.map(o => `<tr><td>${esc(prod(o.producto).nombre)}</td><td class="n">${o.cant} kg</td><td class="n">S/ ${o.precio.toFixed(2)}</td></tr>`).join("") + `</table>`
+      : '<p class="muted">Sin stock publicado para esta semana.</p>'}
+    <button class="btn sec" onclick="document.getElementById('modal').classList.remove('open')">Cerrar ficha</button>
+  `);
+}
+
+function contadores() {
+  document.querySelectorAll("[data-count]").forEach(el => {
+    const fin = parseFloat(el.dataset.count), dec = +el.dataset.dec || 0, t0 = performance.now();
+    (function paso(t) {
+      const p = Math.min(1, (t - t0) / 1000), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(fin * e, dec);
+      if (p < 1) requestAnimationFrame(paso);
+    })(t0);
+  });
+}
+
+document.addEventListener("input", e => {
+  if (e.target.id === "f-prod-q" || e.target.id === "f-prod-asoc") filtrarProductores();
+  if (e.target.id === "f-com-q" || e.target.id === "f-com-tipo") filtrarComedores();
+});
+
+/* ============ FILTROS EN TIEMPO REAL ============ */
+function renderCardsProductores(lista) {
+  if (!lista.length) return `<div class="card"><p class="muted">No se encontraron productores con ese filtro.</p></div>`;
+  return `<div class="grid-3">` + lista.map(p => {
+    const of = DB.ofertas.filter(o => o.productor === p.id);
+    const totalKg = of.reduce((s, o) => s + o.cant, 0);
+    return `<article class="card media-card">
+      <div class="media-cover">
+        <img src="${esc(p.parcelaImg)}" alt="Cultivos de ${esc(p.nombre)}" loading="lazy">
+        <span class="chip media-badge">${esc(p.sello)}</span>
+      </div>
+      <div class="avatar-wrap">
+        <img class="avatar" src="${esc(p.avatar)}" alt="${esc(p.nombre)}" loading="lazy">
+        <div>
+          <strong style="display:block;line-height:1.2">${esc(p.nombre)}</strong>
+          <small class="muted">${esc(p.sector)}</small>
+        </div>
+      </div>
+      <div class="media-body">
+        <div class="media-meta">
+          <span class="chip soft">${esc(p.asoc)}</span>
+          <span class="chip soft">${p.ha} ha</span>
+        </div>
+        <p class="muted" style="font-size:.88rem;margin:4px 0 10px">${esc(p.especialidad)}</p>
+        <div class="media-footer">
+          <span style="font-size:.85rem"><strong>${totalKg} kg</strong> ofertados</span>
+          <button class="btn small sec" data-ver-prod="${p.id}">Ver ficha</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("") + `</div>`;
+}
+
+function filtrarProductores() {
+  const q = ($("#f-prod-q")?.value || "").toLowerCase();
+  const asoc = $("#f-prod-asoc")?.value || "";
+  const filtrados = DB.productores.filter(p =>
+    (!asoc || p.asoc === asoc) &&
+    (p.nombre.toLowerCase().includes(q) || p.especialidad.toLowerCase().includes(q) || p.sector.toLowerCase().includes(q))
+  );
+  $("#lista-productores").innerHTML = renderCardsProductores(filtrados);
+}
+
+function renderCardsComedores(lista) {
+  if (!lista.length) return `<div class="card"><p class="muted">No hay comedores que coincidan con la búsqueda.</p></div>`;
+  return `<div class="grid-3">` + lista.map(c => {
+    const ped = DB.pedidos[c.id];
+    const kgPed = ped ? ped.reduce((s, l) => s + l[1], 0) : 0;
+    return `<article class="card media-card">
+      <div class="media-cover">
+        <img src="${esc(c.img)}" alt="${esc(c.nombre)}" loading="lazy">
+        <span class="chip ${c.tipo === "olla común" ? "org" : ""} media-badge">${esc(c.tipo)}</span>
+      </div>
+      <div class="media-body">
+        <h3>${esc(c.nombre)}</h3>
+        <span class="muted" style="font-size:.88rem">📍 ${esc(c.dir)}</span>
+        <div class="media-meta">
+          <span class="chip soft">👥 ${c.usuarios} raciones/día</span>
+          <span class="chip soft">📦 ${kgPed} kg pedidos</span>
+        </div>
+      </div>
+    </article>`;
+  }).join("") + `</div>`;
+}
+
+function filtrarComedores() {
+  const q = ($("#f-com-q")?.value || "").toLowerCase();
+  const tipo = $("#f-com-tipo")?.value || "";
+  const filtrados = DB.comedores.filter(c =>
+    (!tipo || c.tipo === tipo) &&
+    (c.nombre.toLowerCase().includes(q) || c.dir.toLowerCase().includes(q))
+  );
+  $("#lista-comedores").innerHTML = renderCardsComedores(filtrados);
+}
+
+/* ============ LÓGICA INTELIGENTE DEL CHATBOT (HUERTOBOT) ============ */
+function responderChatbot(texto) {
+  const q = texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const cons = consolidado();
+
+  if (q.includes("hola") || q.includes("buen") || q.includes("ayuda")) {
+    return "¡Hola! Puedo darte información en tiempo real sobre precios por kilo, stock de hortalizas, lista de los 8 productores, comedores o cómo ingresar a tu panel. ¿Qué necesitas saber?";
+  }
+  if (q.includes("precio") || q.includes("cuesta") || q.includes("costo") || q.includes("kilo") || q.includes("soles")) {
+    const lista = cons.slice(0, 6).map(p => `• <strong>${p.nombre}:</strong> S/ ${(p.acordado || p.prom || 1.8).toFixed(2)}/kg`).join("<br>");
+    return `Estos son los precios acordados en chacra esta semana:<br>${lista}<br><small>Puedes ver los 10 productos en la tabla de Inicio.</small>`;
+  }
+  if (q.includes("stock") || q.includes("producto") || q.includes("verdura") || q.includes("hortaliza") || q.includes("oferta") || q.includes("disponible")) {
+    const disp = cons.filter(p => p.ofrece > 0).map(p => `${p.nombre} (${p.ofrece} kg)`).join(", ");
+    return `Actualmente tenemos <strong>${cons.reduce((s, p) => s + p.ofrece, 0)} kg</strong> ofertados en total:<br>${disp}.`;
+  }
+  if (q.includes("productor") || q.includes("agricultor") || q.includes("carabayllo") || q.includes("chillon")) {
+    const nombres = DB.productores.map(p => `• <strong>${p.nombre}</strong> (${p.especialidad})`).join("<br>");
+    return `Trabajamos con <strong>${DB.productores.length} productores</strong> del Valle del Chillón:<br>${nombres}`;
+  }
+  if (q.includes("comedor") || q.includes("olla") || q.includes("puente piedra")) {
+    return `Articulamos <strong>${DB.comedores.length} comedores y ollas piloto</strong> en Puente Piedra (como Comedor Virgen de Fátima y Olla Común Nueva Esperanza), atendiendo a cientos de familias cada semana.`;
+  }
+  if (q.includes("entrar") || q.includes("login") || q.includes("sesion") || q.includes("clave") || q.includes("demo") || q.includes("usuario")) {
+    return `Para probar el sistema ve a <strong>Iniciar sesión</strong> y usa los botones de acceso rápido, o ingresa:<br>• Coordinador: <code>coord</code> / <code>coord123</code><br>• Comedor: <code>comedor1</code> / <code>demo123</code><br>• Productor: <code>productor1</code> / <code>demo123</code>`;
+  }
+  if (q.includes("ruta") || q.includes("entrega") || q.includes("mapa") || q.includes("camion")) {
+    return `Las entregas salen desde el centro de acopio en Carabayllo hacia Puente Piedra usando una ruta optimizada (algoritmo 2-Opt) que reduce en 74% el recorrido frente a ir hasta mercados mayoristas.`;
+  }
+  return `Entiendo tu consulta sobre "<em>${esc(texto)}</em>". Puedo informarte sobre <strong>precios</strong>, <strong>stock disponible</strong>, <strong>productores</strong>, <strong>comedores</strong> o <strong>rutas de entrega</strong>. ¡Prueba preguntarme por alguno de esos temas!`;
+}
+
+/* ============ VISTAS DE LA APLICACIÓN ============ */
+const VISTAS = {
+  inicio: () => `
+    <div class="subnav" aria-label="Ir a sección de inicio">
+      <button type="button" onclick="irASeccion('sec-cosecha')">🥬 Cosecha semanal</button>
+      <button type="button" onclick="irASeccion('sec-impacto-cifras')">📊 Impacto en cifras</button>
+      <button type="button" onclick="irASeccion('sec-balance')">⚖️ Balance en vivo</button>
+      <button type="button" onclick="irASeccion('sec-accesos')">🚀 Participar</button>
+    </div>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="chip">Puente Piedra ↔ Valle del Chillón</span>
+          <h1>De la chacra a la olla común, sin mayoristas en el medio.</h1>
+          <p>Consolidamos el pedido semanal de comedores y ollas comunes para conectarlo directamente con 8 agricultores locales de Carabayllo mediante una ruta compartida.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <a class="btn lima" style="width:auto" href="#login">Entrar a mi panel</a>
+            <a class="btn" style="width:auto;background:rgba(255,255,255,.16)" href="#productores">Conocer productores</a>
+          </div>
+        </div>
+
+        <!-- Animación SVG temática: Ruta directa de la Chacra al Comedor -->
+        <div class="hero-scene">
+          <svg class="scene-svg" viewBox="0 0 340 200" role="img" aria-label="Animación de transporte directo desde la chacra en Carabayllo hasta el comedor popular">
+            <circle class="sun-pulse" cx="290" cy="38" r="20" fill="#fde047" opacity="0.9"/>
+            <circle cx="290" cy="38" r="28" fill="#fde047" opacity="0.2"/>
+            <path d="M0 135 L65 75 L135 135 Z" fill="#1f7a45"/>
+            <path d="M90 135 L170 65 L250 135 Z" fill="#166534"/>
+            <path d="M210 135 L285 80 L340 135 Z" fill="#1f7a45"/>
+            <rect x="14" y="102" width="46" height="33" rx="4" fill="#b8e35a"/>
+            <path d="M10 104 L37 84 L64 104 Z" fill="#f97316"/>
+            <text x="37" y="123" font-size="9" font-weight="800" fill="#0a2e18" text-anchor="middle">CHACRA</text>
+            <rect x="276" y="98" width="52" height="37" rx="5" fill="#fff"/>
+            <path d="M272 100 L302 80 L332 100 Z" fill="#eab308"/>
+            <text x="302" y="120" font-size="8.5" font-weight="800" fill="#0a2e18" text-anchor="middle">COMEDOR</text>
+            <circle class="steam" cx="296" cy="74" r="3.5" fill="#fff"/>
+            <circle class="steam" cx="304" cy="72" r="4" fill="#fff"/>
+            <circle class="steam" cx="311" cy="75" r="3" fill="#fff"/>
+            <rect x="0" y="135" width="340" height="65" fill="#0d3b20"/>
+            <line x1="12" y1="158" x2="328" y2="158" stroke="#b8e35a" stroke-width="2.5" stroke-dasharray="10 8"/>
+            <g class="truck-group">
+              <rect x="66" y="122" width="44" height="24" rx="4" fill="#b8e35a"/>
+              <rect x="110" y="128" width="18" height="18" rx="3" fill="#f97316"/>
+              <rect x="115" y="131" width="9" height="7" rx="1.5" fill="#e0f2fe"/>
+              <circle cx="80" cy="120" r="5" fill="#ef4444"/>
+              <circle cx="90" cy="119" r="5" fill="#22c55e"/>
+              <circle cx="100" cy="120" r="5" fill="#f59e0b"/>
+              <circle class="wheel" cx="78" cy="147" r="6.5" fill="#1e293b" stroke="#fff" stroke-width="2"/>
+              <circle class="wheel" cx="118" cy="147" r="6.5" fill="#1e293b" stroke="#fff" stroke-width="2"/>
+            </g>
+            <text x="170" y="185" font-size="10" font-weight="700" fill="#d6ecd9" text-anchor="middle">Ruta directa sin intermediarios · 74% menos recorrido</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <h2 id="sec-cosecha">🥬 Cosecha disponible esta semana (${DB.productos.length} productos)</h2>
+    <div class="prod-strip">
+      ${DB.productos.map(p => {
+        const ofertaKg = DB.ofertas.filter(o => o.producto === p.id).reduce((s, o) => s + o.cant, 0);
+        return `<div class="prod-item">
+          <img src="${esc(p.img)}" alt="${esc(p.nombre)}" loading="lazy">
+          <strong>${esc(p.nombre)}</strong>
+          <small>${ofertaKg} kg disp.</small>
+        </div>`;
+      }).join("")}
+    </div>
+
+    <h2 id="sec-impacto-cifras">📊 Alcance e impacto territorial</h2>
+    <div class="stats">
+      <div class="stat"><b data-count="131">0</b><span>comedores populares en Puente Piedra</span></div>
+      <div class="stat"><b data-count="60">0</b><span>ollas comunes articuladas</span></div>
+      <div class="stat"><b data-count="13568">0</b><span>beneficiarios directos</span></div>
+      <div class="stat o"><b data-count="30.5" data-dec="1">0</b><span>% de hogares con inseguridad alimentaria</span></div>
+      <div class="stat o"><b data-count="2031">0</b><span>hectáreas agrícolas perdidas en Carabayllo</span></div>
+      <div class="stat"><b data-count="74">0</b><span>% menos recorrido logístico por viaje</span></div>
+    </div>
+
+    <h2 id="sec-balance">⚖️ Balance semanal en vivo · Semana ${SEMANA}</h2>
+    <div class="ledger scroll">${tablaConsolidado()}</div>
+
+    <div class="grid-2" id="sec-accesos">
+      <div class="card">
+        <h3>¿Eres dirigente de comedor?</h3>
+        <p class="muted">Registra el requerimiento semanal de hortalizas de tu cocina y recibe todo en una sola entrega programada.</p>
+        <a class="btn sec" href="#como">Ver cómo funciona</a>
+      </div>
+      <div class="card">
+        <h3>Simula el impacto del modelo</h3>
+        <p class="muted">Ajusta raciones, días de atención y precios para calcular el ahorro económico y las toneladas de CO₂ evitadas.</p>
+        <a class="btn" href="#impacto">Abrir simulador</a>
+      </div>
+    </div>`,
+
+  como: () => `
+    <h1>Cómo funciona HuertoDirecto</h1>
+    <p class="muted">Un ciclo semanal simple diseñado para funcionar incluso con conectividad básica.</p>
+    <div class="grid-2" style="align-items:center">
+      <ol class="pasos">
+        <li><strong>Pedido consolidado.</strong> Cada dirigente registra los kilos que necesita su comedor antes del cierre semanal.</li>
+        <li><strong>Oferta en chacra.</strong> Los ${DB.productores.length} agricultores de Carabayllo publican su cosecha disponible y precio por kilo.</li>
+        <li><strong>Cruce y precio justo.</strong> El coordinador equilibra oferta y demanda, detecta faltantes y valida precios acordados.</li>
+        <li><strong>Ruta única optimizada.</strong> El sistema ordena las paradas con algoritmo de menor distancia para ahorrar combustible.</li>
+        <li><strong>Recepción y calidad.</strong> El comedor califica las hortalizas recibidas para retroalimentar el siguiente ciclo.</li>
+      </ol>
+      <div class="card" style="padding:12px">
+        <img src="https://images.unsplash.com/photo-1592419044706-39796d40f98c?auto=format&fit=crop&w=800&q=80" alt="Agricultores cosechando hortalizas" style="width:100%;height:310px;object-fit:cover;border-radius:14px">
+        <p class="muted" style="margin:10px 4px 2px;font-size:.88rem"><strong>Sin intermediarios:</strong> El agricultor recibe el pago íntegro contra entrega verificada en el comedor.</p>
+      </div>
+    </div>`,
+
+  productores: () => {
+    const asocs = [...new Set(DB.productores.map(p => p.asoc))];
+    return `
+      <h1>Productores del Valle del Chillón (${DB.productores.length})</h1>
+      <p class="muted">Agricultores familiares de Carabayllo que abastecen directamente a los comedores de Puente Piedra.</p>
+      <div class="toolbar">
+        <input id="f-prod-q" type="search" placeholder="Buscar por nombre, cultivo o sector...">
+        <select id="f-prod-asoc" aria-label="Filtrar por asociación">
+          <option value="">Todas las asociaciones</option>
+          ${asocs.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}
+        </select>
+      </div>
+      <div id="lista-productores">${renderCardsProductores(DB.productores)}</div>`;
+  },
+
+  comedores: () => `
+    <h1>Comedores y Ollas Comunes (${DB.comedores.length})</h1>
+    <p class="muted">Organizaciones sociales de base participantes en el piloto de abastecimiento directo.</p>
+    <div class="toolbar">
+      <input id="f-com-q" type="search" placeholder="Buscar comedor o zona...">
+      <select id="f-com-tipo" aria-label="Filtrar por tipo">
+        <option value="">Todos los tipos</option>
+        <option value="comedor popular">Comedor popular</option>
+        <option value="olla común">Olla común</option>
+      </select>
+    </div>
+    <div id="lista-comedores">${renderCardsComedores(DB.comedores)}</div>`,
+
+  /* ---- PESTAÑA SIMULADOR REEMPLAZADA ---- */
+  impacto: () => `
+    <h1>De las chacras del Carabayllo a Puente Piedra</h1>
+    <p class="sim-sub">Ocho camiones salen con un alimento distinto cada uno y recorren la misma ruta hasta el mercado de un barrio de ingresos medios y bajos. Compara cuánto llega en buen estado y cuánto cuesta cada kilo que realmente se puede vender.</p>
+
+    <div class="sim-stage">
+      <svg id="sc" viewBox="0 0 1000 420" role="img" aria-label="Ocho camiones con tomate, lechuga, fresa, papa, zanahoria, plátano, uva y palta viajan desde las chacras del Carabayllo hasta el mercado de Puente Piedra">
+        <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0f2"/><stop offset="1" stop-color="#eaf5e4"/></linearGradient></defs>
+        <rect width="1000" height="420" fill="url(#sk)"/>
+        <circle cx="880" cy="60" r="24" fill="#ffd54a"/>
+        <path d="M0 260 Q120 190 260 250 T520 240 T760 245 L760 420 L0 420Z" fill="#8fb27b"/>
+        <path d="M0 300 Q200 265 400 310 T760 300 L760 420 L0 420Z" fill="#6f9a5c"/>
+        <g id="rows" stroke="#4e7a3f" stroke-width="2"></g>
+        <rect x="760" y="310" width="240" height="110" fill="#8a8f93"/>
+        <g fill="#6a7278"><rect x="772" y="250" width="40" height="60"/><rect x="818" y="270" width="36" height="40"/><rect x="860" y="240" width="42" height="70"/><rect x="908" y="262" width="44" height="48"/></g>
+        <path id="route" d="M50 350 C140 350 160 320 250 320 S400 365 500 345 S640 305 730 330 S880 360 960 345" fill="none" stroke="#4a4f52" stroke-width="58" stroke-linecap="round"/>
+        <path d="M50 350 C140 350 160 320 250 320 S400 365 500 345 S640 305 730 330 S880 360 960 345" fill="none" stroke="#f3e9b0" stroke-width="2" stroke-dasharray="10 10"/>
+        <g id="nodes" font-family="system-ui" font-size="13" fill="#1f2b27" text-anchor="middle"></g>
+        <text id="blk" x="440" y="290" font-size="13" font-family="system-ui" fill="#8a2d1f" text-anchor="middle" opacity="0">Retraso en ruta</text>
+        <g id="trucks"></g>
+        <text x="20" y="32" font-size="22" font-family="Georgia,serif" fill="#1f2b27" id="ttl"></text>
+        <text x="20" y="54" font-size="14" font-family="system-ui" fill="#1f2b27" id="clk"></text>
+      </svg>
+      <div class="sim-ctl">
+        <div class="sim-row">
+          <button type="button" id="play">Pausar</button>
+          <button type="button" id="reset">Volver a empezar</button>
+          <label><input type="checkbox" id="ct"> Camiones refrigerados</label>
+          <label><input type="checkbox" id="cm"> Frío en el mercado del barrio</label>
+        </div>
+        <label>Distancia por carretera (supuesto): <b id="dv"></b><input id="dist" type="range" min="10" max="100" step="1" value="30"></label>
+        <label>Estado de la vía<select id="road"><option value="0">Buena</option><option value="1" selected>Regular</option><option value="2">Mala</option></select></label>
+        <label>Temperatura ambiente: <b id="tv"></b><input id="amb" type="range" min="14" max="34" step="1" value="24"></label>
+        <label>Retraso en ruta (tráfico, bloqueo): <b id="rv"></b><input id="dly" type="range" min="0" max="12" step="1" value="0"></label>
+        <label>Margen de intermediarios en la cadena tradicional (supuesto): <b id="mv"></b><input id="mg" type="range" min="0" max="60" step="5" value="30"></label>
+        <label>Velocidad: <b id="sv"></b><input id="spd" type="range" min="0.1" max="6" step="0.1" value="0.5"></label>
+      </div>
+    </div>
+
+    <div class="sim-grid">
+      <div class="sim-card">
+        <h2>Calidad de cada cargamento ahora</h2>
+        <div id="live"></div>
+        <svg id="ch" viewBox="0 0 300 110" style="margin-top:8px;width:100%;height:auto" aria-label="Calidad de los cargamentos a lo largo del tiempo"></svg>
+      </div>
+      <div class="sim-card">
+        <h2>Resultado al llegar a Puente Piedra</h2>
+        <table>
+          <thead><tr><th>Alimento</th><th>Merma sin frío</th><th>Merma con frío</th><th>S/ por kg sin frío</th><th>S/ por kg con frío</th></tr></thead>
+          <tbody id="cmp"></tbody>
+        </table>
+        <p style="color:var(--muted);margin:10px 0 0" id="msg"></p>
+      </div>
+    </div>
+
+    <div class="sim-card" style="margin-top:16px">
+      <h2>Índice de ahorro para Puente Piedra</h2>
+      <div id="ix"></div>
+    </div>
+
+    <p class="sim-note">Simulación didáctica con supuestos propios, no mediciones. “Sin frío” significa camión común y mercado sin refrigeración; “con frío”, ambos refrigerados. La distancia, la vida útil de cada producto, los precios en la chacra, la carga de 2 000 kg por camión, el flete (S/ 3 por km, 30 % más con camión refrigerado), el costo de refrigerar en el mercado (S/ 0,05 por kg), la duración de cada etapa y la relación entre calidad y merma son valores inventados para ilustrar el efecto de cada decisión. El costo por kg vendible incluye lo que se pagó por el cargamento completo, así que cada kilo perdido encarece los que sí se venden, algo que pesa más en un barrio con presupuestos ajustados. El ahorro compara con una cadena tradicional supuesta: pasa por un mercado mayorista (30 km más, 6 h extra, sin frío) y los intermediarios suman el margen indicado; la compra de 20 kg al mes por familia también es un supuesto.</p>`,
+
+  login: () => `
+    <h1>Iniciar sesión</h1>
+    <div class="grid-2">
+      <form class="card" id="f-login">
+        <label for="l">Usuario</label>
+        <input id="l" autocomplete="username" placeholder="Ej. coord, comedor1, productor1" required>
+        <label for="c">Clave</label>
+        <input id="c" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <button class="btn">Entrar al panel</button>
+      </form>
+      <div class="card">
+        <h3>Acceso rápido de demostración</h3>
+        <p class="muted" style="font-size:.88rem">Haz clic en cualquier perfil para ingresar directamente:</p>
+        <div class="demo-grid">
+          <button type="button" class="demo-pill" data-quick="coord:coord123"><b>Coordinador</b>Gestión, precios y ruta</button>
+          <button type="button" class="demo-pill" data-quick="comedor1:demo123"><b>Comedor 1</b>Virgen de Fátima</button>
+          <button type="button" class="demo-pill" data-quick="productor1:demo123"><b>Productor 1</b>Juan Pérez Huamán</button>
+          <button type="button" class="demo-pill" data-quick="productor4:demo123"><b>Productor 4</b>Rosaura Tello</button>
+        </div>
+      </div>
+    </div>`,
+
+  /* ---- PANEL COMEDOR ---- */
+  "c-resumen": () => {
+    const id = USER.ref, ped = DB.pedidos[id], ent = DB.entregas.find(e => e.comedor === id), conf = DB.confirmaciones[id];
+    const c = com(id);
+    return `
+      <div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <img src="${esc(c.img)}" alt="${esc(c.nombre)}" style="width:96px;height:96px;border-radius:16px;object-fit:cover">
+        <div>
+          <span class="chip soft">${esc(c.tipo)}</span>
+          <h1 style="margin:4px 0">${esc(c.nombre)}</h1>
+          <span class="muted">📍 ${esc(c.dir)} · ${c.usuarios} beneficiarios</span>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Pedido de la semana ${SEMANA}</h3>
+          <p>${ped ? `<span class="ok">✓ Registrado (${ped.reduce((s, x) => s + x[1], 0)} kg en ${ped.length} productos)</span>` : '<span class="falta">Aún no registrado</span>'}</p>
+          <a class="btn" href="#c-pedido">${ped ? "Modificar pedido" : "Registrar pedido"}</a>
+        </div>
+        <div class="card">
+          <h3>Estado de entrega</h3>
+          <p>${ent ? `Parada <strong>#${DB.entregas.indexOf(ent) + 1}</strong> de la ruta · ${conf ? '<span class="ok">Recepción confirmada</span>' : "En camino / programada"}`
+            : '<span class="muted">El coordinador aún no genera la ruta semanal.</span>'}</p>
+          ${ent && !conf ? '<a class="btn warn" href="#c-recepcion">Confirmar recepción</a>' : ""}
+        </div>
+      </div>`;
+  },
+
+  "c-pedido": () => {
+    const prev = Object.fromEntries((DB.pedidos[USER.ref] || []).map(l => [l[0], l]));
+    return `
+      <h1>Pedido semanal · Semana ${SEMANA}</h1>
+      <form class="card" id="f-pedido">
+        <div class="row muted"><span>Producto</span><span>Kilos (kg)</span><span>Día</span></div>
+        ${DB.productos.map(p => `
+          <div class="row">
+            <label for="c${p.id}" style="margin:0;display:flex;align-items:center;gap:10px">
+              <img src="${esc(p.img)}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover">
+              <span>${esc(p.nombre)}</span>
+            </label>
+            <input id="c${p.id}" name="cant_${p.id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0" value="${prev[p.id] ? prev[p.id][1] : ""}">
+            <select name="dia_${p.id}">${DIAS.map(d => `<option ${prev[p.id] && prev[p.id][2] === d ? "selected" : ""}>${d}</option>`).join("")}</select>
+          </div>`).join("")}
+        <button class="btn">Guardar y enviar pedido</button>
+      </form>`;
+  },
+
+  "c-historial": () => {
+    const l = DB.pedidos[USER.ref] || [];
+    return `
+      <h1>Detalle de mi pedido · Semana ${SEMANA}</h1>
+      <div class="card scroll">
+        <table>
+          <tr><th>Producto</th><th class="n">Cantidad</th><th>Día entrega</th><th class="n">Precio ref.</th><th class="n">Subtotal est.</th></tr>
+          ${l.length ? l.map(x => {
+            const pr = prod(x[0]), pu = DB.precios[x[0]] || 1.8;
+            return `<tr><td>${esc(pr.nombre)}</td><td class="n">${x[1]} kg</td><td>${x[2]}</td><td class="n">S/ ${pu.toFixed(2)}</td><td class="n">S/ ${(x[1] * pu).toFixed(2)}</td></tr>`;
+          }).join("") : '<tr><td colspan="5" class="muted">Aún no hay productos registrados.</td></tr>'}
+        </table>
+      </div>`;
+  },
+
+  "c-recepcion": () => {
+    if (!DB.entregas.find(e => e.comedor === USER.ref)) return `<h1>Confirmar recepción</h1><div class="card"><p class="muted">Todavía no hay una entrega programada para este comedor.</p></div>`;
+    return `
+      <h1>Confirmar recepción</h1>
+      <form class="card" id="f-recep">
+        <label>¿Recibiste el pedido completo?</label>
+        <div class="radio">
+          <label><input type="radio" name="rec" value="completo" required><span>Sí, completo</span></label>
+          <label><input type="radio" name="rec" value="parcial"><span>Parcial</span></label>
+          <label><input type="radio" name="rec" value="rechazado"><span>Rechazado</span></label>
+        </div>
+        <label>Calidad y frescura de las hortalizas</label>
+        <div class="stars">${[5, 4, 3, 2, 1].map(i => `<input type="radio" id="s${i}" name="cal" value="${i}" ${i === 5 ? "checked" : ""}><label for="s${i}">★</label>`).join("")}</div>
+        <label for="o">Observaciones</label>
+        <textarea id="o" name="obs" rows="3" maxlength="300" placeholder="Ej.: Todo fresco y bien pesado"></textarea>
+        <button class="btn">Registrar conformidad</button>
+      </form>`;
+  },
+
+  /* ---- PANEL PRODUCTOR ---- */
+  "p-oferta": () => {
+    const p = prd(USER.ref);
+    const mias = DB.ofertas.filter(o => o.productor === USER.ref);
+    const ingresoEst = mias.reduce((s, o) => s + o.cant * o.precio, 0);
+    return `
+      <div class="card" style="display:flex;gap:14px;align-items:center">
+        <img src="${esc(p.avatar)}" alt="${esc(p.nombre)}" class="avatar" style="width:68px;height:68px">
+        <div>
+          <span class="chip">${esc(p.sello)}</span>
+          <h1 style="margin:2px 0;font-size:1.5rem">${esc(p.nombre)}</h1>
+          <span class="muted">${esc(p.asoc)} · ${p.ha} ha · Ingreso proyectado: <strong>S/ ${ingresoEst.toFixed(2)}</strong></span>
+        </div>
+      </div>
+      <div class="grid-2">
+        <form class="card" id="f-oferta">
+          <h3>Agregar cosecha disponible</h3>
+          <label for="pr">Producto</label>
+          <select id="pr" name="producto">${DB.productos.map(x => `<option value="${x.id}">${esc(x.nombre)}</option>`).join("")}</select>
+          <label for="ca">Cantidad disponible (kg)</label>
+          <input id="ca" name="cant" type="number" step="0.5" min="1" inputmode="decimal" placeholder="Ej. 150" required>
+          <label for="pc">Precio en chacra (S/ por kg)</label>
+          <input id="pc" name="precio" type="number" step="0.05" min="0.1" inputmode="decimal" placeholder="Ej. 1.80" required>
+          <button class="btn">Publicar oferta</button>
+        </form>
+        <div class="card scroll">
+          <h3>Mi oferta publicada · Semana ${SEMANA}</h3>
+          <table>
+            <tr><th>Producto</th><th class="n">Kg</th><th class="n">S/ kg</th><th></th></tr>
+            ${mias.map(o => `<tr>
+              <td>${esc(prod(o.producto).nombre)}</td>
+              <td class="n">${o.cant}</td>
+              <td class="n">${o.precio.toFixed(2)}</td>
+              <td><button class="btn sec small" data-del="${o.id}">Quitar</button></td>
+            </tr>`).join("") || '<tr><td colspan="4" class="muted">Sin ofertas registradas.</td></tr>'}
+          </table>
+        </div>
+      </div>`;
+  },
+
+  "p-entregas": () => `
+    <h1>Cronograma de entregas · Semana ${SEMANA}</h1>
+    ${DB.entregas.length ? DB.entregas.map((e, i) => `
+      <div class="card">
+        <strong>Parada #${i + 1} · ${esc(com(e.comedor).nombre)}</strong>
+        <span class="muted"> · ${esc(com(e.comedor).dir)}</span><br>
+        <small>${DB.confirmaciones[e.comedor] ? '<span class="ok">✓ Entregado y verificado</span>' : "Pendiente de despacho"}</small>
+      </div>`).join("") : '<div class="card"><p class="muted">El coordinador aún no ha publicado la ruta semanal.</p></div>'}`,
+
+  /* ---- PANEL COORDINADOR ---- */
+  "k-consolidado": () => `
+    <h1>Consolidado oferta vs. demanda · Semana ${SEMANA}</h1>
+    <div class="card scroll">${tablaConsolidado()}</div>
+    <h2>Acuerdo de precios semanales (S/ por kg)</h2>
+    <form class="card" id="f-precios">
+      ${consolidado().map(f => `
+        <div class="row">
+          <label for="p${f.id}" style="margin:0">
+            <strong>${esc(f.nombre)}</strong><br>
+            <small class="muted">Prom. ofertado: ${f.prom ? "S/ " + f.prom.toFixed(2) : "—"}</small>
+          </label>
+          <input id="p${f.id}" name="${f.id}" type="number" step="0.05" min="0" inputmode="decimal" value="${f.acordado ?? ""}">
+          <span class="muted" style="font-size:.82rem">S/ kg</span>
+        </div>`).join("")}
+      <button class="btn">Guardar precios acordados</button>
+    </form>
+    <a class="btn warn" href="#k-ruta">Continuar a planificación de ruta →</a>`,
+
+  "k-ruta": () => {
+    const hay = DB.entregas.length;
+    return `
+      <h1>Ruta compartida de acopio y reparto</h1>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <button class="btn warn" style="width:auto;margin:0" id="b-ruta">${hay ? "Recalcular ruta óptima (2-Opt)" : "Generar ruta única de entrega"}</button>
+        ${hay ? `<button class="btn sec" style="width:auto;margin:0" onclick="window.print()">🖨️ Imprimir hoja de ruta</button>` : ""}
+      </div>
+      ${hay ? `
+        <p>Distancia estimada: <strong>${kmRuta().toFixed(1)} km</strong> ida y vuelta desde el centro de acopio en Carabayllo (optimizado con heurística 2-Opt).</p>
+        <div id="mapa" role="img" aria-label="Mapa de ruta"></div>
+        <div class="grid-2">
+          ${DB.entregas.map((e, i) => {
+            const c = com(e.comedor);
+            const items = (DB.pedidos[e.comedor] || []).map(l => `${prod(l[0]).nombre} (${l[1]} kg)`).join(", ");
+            return `<div class="card">
+              <span class="chip">Parada #${i + 1}</span>
+              <h3 style="margin-top:8px">${esc(c.nombre)}</h3>
+              <p class="muted" style="font-size:.88rem;margin:2px 0 8px">📍 ${esc(c.dir)}</p>
+              <p style="font-size:.9rem;margin:0 0 10px"><strong>Carga:</strong> ${esc(items)}</p>
+              <a class="btn small sec" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`HuertoDirecto (Sem ${SEMANA}): Tu comedor es la parada #${i + 1}. Pedido: ${items}`)}">Notificar por WhatsApp</a>
+            </div>`;
+          }).join("")}
+        </div>` : '<div class="card"><p class="muted">Presiona el botón superior para calcular el orden óptimo de entrega según los pedidos activos.</p></div>'}`;
+  },
+
+  "k-reportes": () => {
+    const f = consolidado();
+    const pide = f.reduce((s, x) => s + x.pide, 0);
+    const cub = f.reduce((s, x) => s + Math.min(x.pide, x.ofrece), 0);
+    const confs = Object.values(DB.confirmaciones);
+    const cal = confs.length ? (confs.reduce((s, c) => s + c.cal, 0) / confs.length).toFixed(1) : "—";
+    const km = kmRuta();
+    const mx = Math.max(1, ...f.map(x => Math.max(x.pide, x.ofrece)));
+    const valorTotal = f.reduce((s, x) => s + Math.min(x.pide, x.ofrece) * (x.acordado || x.prom || 1.8), 0);
+
+    return `
+      <h1>Indicadores de gestión · Semana ${SEMANA}</h1>
+      <div class="kpis">
+        <div class="kpi"><strong>${pide ? (100 * cub / pide).toFixed(1) : 0}%</strong><span class="muted">Cobertura de demanda</span></div>
+        <div class="kpi"><strong>S/ ${fmt(valorTotal, 2)}</strong><span class="muted">Movimiento directo en chacra</span></div>
+        <div class="kpi"><strong>${Object.keys(DB.pedidos).length} / ${DB.comedores.length}</strong><span class="muted">Comedores abastecidos</span></div>
+        <div class="kpi"><strong>${km.toFixed(1)} km</strong><span class="muted">Recorrido total ruta</span></div>
+        <div class="kpi"><strong>${(km * FACTORES[0]).toFixed(1)}–${(km * FACTORES[1]).toFixed(1)} kg</strong><span class="muted">Emisiones CO₂ estimadas</span></div>
+        <div class="kpi"><strong>${cal} / 5</strong><span class="muted">Calidad percibida</span></div>
+      </div>
+      <h2>Comparativa por cultivo (kg)</h2>
+      <div class="card">
+        ${f.map(x => `
+          <div style="margin:10px 0">
+            <div style="display:flex;justify-content:space-between;font-size:.88rem">
+              <strong>${esc(x.nombre)}</strong>
+              <span class="muted">Piden: ${x.pide} kg · Ofrecen: ${x.ofrece} kg</span>
+            </div>
+            <div class="bar" style="height:10px;margin-top:4px"><i class="o" style="width:${100 * x.pide / mx}%"></i></div>
+            <div class="bar" style="height:10px;margin-top:3px"><i style="width:${100 * x.ofrece / mx}%"></i></div>
+          </div>`).join("")}
+        <small class="muted">Barra naranja = Demanda comedores · Barra verde = Oferta productores</small>
+      </div>`;
+  }
+};
+
+/* ============ CONTROL DE ROLES Y ENRUTADOR ============ */
+const ROL_DE = v => v.startsWith("c-") ? "comedor" : v.startsWith("p-") ? "productor" : v.startsWith("k-") ? "coordinador" : null;
+const MENU = {
+  publico: [["inicio", "Inicio"], ["como", "Cómo funciona"], ["productores", "Productores (8)"], ["comedores", "Comedores"], ["impacto", "Simulador"]],
+  comedor: [["c-resumen", "Resumen"], ["c-pedido", "Hacer Pedido"], ["c-historial", "Mi Detalle"], ["c-recepcion", "Recepción"]],
+  productor: [["p-oferta", "Mi Oferta"], ["p-entregas", "Entregas"]],
+  coordinador: [["k-consolidado", "Consolidado"], ["k-ruta", "Ruta y Mapa"], ["k-reportes", "Reportes"]]
+};
+
+let mapa = null;
+
+function render() {
+  let v = location.hash.slice(1) || "inicio";
+  if (!VISTAS[v]) v = "inicio";
+  const rol = ROL_DE(v);
+  if (rol && (!USER || USER.rol !== rol)) v = USER ? MENU[USER.rol][0][0] : "login";
+
+  $("#sesion").innerHTML = USER
+    ? `<span style="font-size:.85rem;margin-right:8px">${esc(USER.nombre)}</span><button id="b-salir">Salir</button>`
+    : '<a href="#login" style="font-weight:700">Iniciar sesión</a>';
+
+  $("#nav").innerHTML = MENU[USER ? USER.rol : "publico"]
+    .map(([h, t]) => `<a href="#${h}" class="${h === v ? "on" : ""}">${t}</a>`).join("");
+
+  $("#app").innerHTML = VISTAS[v]();
+  $("#app").classList.remove("in");
+  void $("#app").offsetWidth;
+  $("#app").classList.add("in");
+
+  if (FLASH) { toast(FLASH); FLASH = ""; }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  contadores();
+
+  if (v === "impacto") {
+    initSimulador();
+  }
+
+  if (mapa) { mapa.remove(); mapa = null; }
+  if (v === "k-ruta" && DB.entregas.length && window.L) {
+    mapa = L.map("mapa");
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(mapa);
+
+    const st = DB.entregas.map(e => com(e.comedor));
+    const pts = [HUB, ...st.map(c => [c.lat, c.lng]), HUB];
+
+    L.marker(HUB).addTo(mapa).bindPopup("<strong>Centro de Acopio Carabayllo</strong><br>Punto de partida y retorno");
+    DB.productores.forEach(p => {
+      L.circleMarker([p.lat, p.lng], { radius: 6, color: "#14532d", fillColor: "#b8e35a", fillOpacity: 0.9 })
+        .addTo(mapa).bindPopup(`🌱 <strong>${esc(p.nombre)}</strong><br>${esc(p.sector)}`);
+    });
+    st.forEach((c, i) => {
+      L.marker([c.lat, c.lng]).addTo(mapa).bindPopup(`<strong>Parada #${i + 1}: ${esc(c.nombre)}</strong><br>${esc(c.dir)}`);
+    });
+    L.polyline(pts, { color: "#f97316", weight: 4, dashArray: "6, 6" }).addTo(mapa);
+    mapa.fitBounds(pts, { padding: [35, 35] });
+  }
+}
+
+window.addEventListener("hashchange", render);
+
+/* ============ EVENTOS DEL CHATBOT ============ */
+function enviarMensajeChat(texto) {
+  if (!texto.trim()) return;
+  const msgs = $("#chat-msgs");
+  msgs.insertAdjacentHTML("beforeend", `<div class="msg usr">${esc(texto)}</div>`);
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    msgs.insertAdjacentHTML("beforeend", `<div class="msg bot">${responderChatbot(texto)}</div>`);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 320);
+}
+
+$("#chat-toggle").addEventListener("click", () => $("#chat-win").classList.toggle("open"));
+$("#chat-close").addEventListener("click", () => $("#chat-win").classList.remove("open"));
+$("#chat-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const inp = $("#chat-in");
+  enviarMensajeChat(inp.value);
+  inp.value = "";
+});
+$("#chat-chips").addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (btn && btn.dataset.q) enviarMensajeChat(btn.dataset.q);
+});
+
+/* ============ MANEJADORES DE FORMULARIOS Y BOTONES ============ */
+document.addEventListener("submit", e => {
+  if (e.target.id === "chat-form") return;
+  e.preventDefault();
+  const f = e.target, d = new FormData(f);
+
+  if (f.id === "f-login") {
+    const u = f.querySelector("#l").value.trim();
+    const p = f.querySelector("#c").value;
+    const x = USUARIOS[u];
+    if (x && x[0] === p) {
+      USER = { rol: x[1], nombre: x[2], ref: x[3] };
+      try { sessionStorage.setItem("hd-user-v4", JSON.stringify(USER)); } catch (_) {}
+      flash("Bienvenido, " + USER.nombre);
+      return go(MENU[USER.rol][0][0]);
+    }
+    flash("Usuario o contraseña incorrectos");
+    return render();
+  }
+
+  if (f.id === "f-pedido") {
+    const lineas = DB.productos.map(p => [p.id, parseFloat(d.get("cant_" + p.id)) || 0, d.get("dia_" + p.id)]).filter(l => l[1] > 0);
+    if (!lineas.length) flash("Ingresa al menos un producto con cantidad mayor a 0");
+    else {
+      DB.pedidos[USER.ref] = lineas;
+      save();
+      flash("Pedido semanal guardado correctamente");
+      return go("c-resumen");
+    }
+    return render();
+  }
+
+  if (f.id === "f-recep") {
+    DB.confirmaciones[USER.ref] = { rec: d.get("rec"), cal: +d.get("cal"), obs: (d.get("obs") || "").slice(0, 300) };
+    save();
+    flash("¡Gracias! Recepción registrada");
+    return go("c-resumen");
+  }
+
+  if (f.id === "f-oferta") {
+    const cant = parseFloat(d.get("cant")), precio = parseFloat(d.get("precio"));
+    if (cant > 0 && precio > 0) {
+      DB.ofertas.push({ id: ++DB.nextOferta, productor: USER.ref, producto: +d.get("producto"), cant, precio });
+      save();
+      flash("Oferta agregada a tu catálogo semanal");
+    } else flash("Verifica la cantidad y el precio");
+    return render();
+  }
+
+  if (f.id === "f-precios") {
+    for (const [k, v] of d.entries()) if (v !== "") DB.precios[k] = parseFloat(v);
+    save();
+    flash("Precios acordados actualizados");
+    return render();
+  }
+});
+
+document.addEventListener("click", e => {
+  if (e.target.id === "foot-reset") {
+    e.preventDefault();
+    DB = SEED();
+    save();
+    toast("Base de datos restaurada con 8 productores");
+    render();
+    return;
+  }
+
+  const t = e.target.closest("button");
+  if (!t) return;
+
+  if (t.id === "b-salir") {
+    USER = null;
+    try { sessionStorage.removeItem("hd-user-v4"); } catch (_) {}
+    go("inicio");
+    render();
+  }
+  if (t.dataset.quick) {
+    const [u] = t.dataset.quick.split(":");
+    const x = USUARIOS[u];
+    USER = { rol: x[1], nombre: x[2], ref: x[3] };
+    try { sessionStorage.setItem("hd-user-v4", JSON.stringify(USER)); } catch (_) {}
+    flash("Sesión iniciada como " + USER.nombre);
+    go(MENU[USER.rol][0][0]);
+  }
+  if (t.dataset.verProd) verProductor(t.dataset.verProd);
+  if (t.dataset.del) {
+    DB.ofertas = DB.ofertas.filter(o => o.id != t.dataset.del);
+    save();
+    toast("Oferta eliminada");
+    render();
+  }
+  if (t.id === "b-ruta") {
+    DB.entregas = optimizarRuta(Object.keys(DB.pedidos).map(Number)).map(c => ({ comedor: c }));
+    save();
+    flash("Ruta optimizada generada con éxito");
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>'''
+
+with open("huertodirecto_v4.html", "w", encoding="utf-8") as f:
+    f.write(html_v4)
+
+print("FILE_SAVED: huertodirecto_v4.html")
